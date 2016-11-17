@@ -1,0 +1,296 @@
+1. rm exited container
+docker rm $(docker ps -q -f status=exited)
+
+2. share host directory to docker containner
+
+
+docker run -it --privileged=true -v /mnt/raid/WRF_STATIC_DATA:/data johnzhu999/app1:v1
+
+/mnt/raid/WRF_STATIC_DATA -----host directory, need absoulte path
+
+/data ---- directory in containner, need absolute path
+
+3. run a docker image
+
+  docker run docker/whalesay cowsay boo
+
+#load image docker/whalesay and run it in the container with command "cowsay boo"
+
+4. list local docker images
+
+docker images
+
+5. check docker containers
+
+docker ps -a  #list all containers
+
+docker ps -l #list the latest container.
+
+6. build docker image with Dockerfile
+
+mkdir mydockerbuild
+cd mydockerbuild
+edit Dockerfile
+
+docker build -t $iamge_name .
+
+7. run a image interactive
+
+docker run -it docker/whalesay /bin/bash
+
+exit
+
+8. save a container to a image
+
+docker run -it image-name /bin/bash
+(docker run -it docker/whalesay /bin/bash)
+root@ea20c53eaebc#
+do whatever you want in the container.
+
+Ctrl-p + Ctrl-q
+
+docker commit container_ID new_image_name
+(docker commit ea20c53eaebc johnzhu999/whalesay)
+
+8.tag your image
+
+docker tag 7d9495d03763 johnzhu999/whalesay:latest
+
+9. push your image to docker hub
+
+docker login
+
+docker push johnzhu999/whalesay
+
+
+
+
+
+
+10. remove a local image 
+
+docker rmi -f ID
+or 
+docker rmi -f image_name
+
+11. pull and run johnzhu999/whalesay
+
+docker run -it johnzhu999/whalesay /bin/bash
+
+12. run a container in background
+
+docker run -d ubuntu /bin/sh -c "while true; do echo hello world; sleep 1; done"
+
+13. check if the container is running
+
+docker ps
+
+#get the container_ID
+
+
+docker logs container_ID
+
+
+stop background container
+
+docker stop container_ID (or container name)
+
+14. run a container with user and work_directory
+
+docker run -it -u jzhu -w /home/jzhu johnzhu999/gina_wrf381
+
+
+15. run specific ubuntu
+
+docker run -it ubuntu:14.04.4
+
+16. delete containers
+
+docker rm $(docker ps -q -f status=exited)
+
+stop a running container
+
+docker stop f65c2004b77f
+
+delete a container
+
+docker rm container_ID
+
+17. add jzhu to sudo group
+
+usermod -aG sudo jzhu
+
+18. install wget
+
+It is because there is no package cache in the image, you need to run:
+
+sudo apt-get -qq update 
+
+then,
+
+sudo apt-get -qq -y install curl
+
+
+19. run anther session of a running container
+
+docker exec -it a87cec470e48 bash
+
+20. to get the available packages
+
+apt-cache search .
+
+to get installed packages
+
+apt list --installed
+
+21. make vi work in docker container
+
+sudo apt-get update
+sudo apt-get install vim
+
+22. incrase docker storage size.
+
+remove your image
+
+/var/lib/docker
+
+sudo docker daemon --storage-opt=dm.basesize=100G
+
+edit the vi /etc/default/docker-storage
+
+DOCKER_STORAGE_OPTIONS="... --storage-opt dm.basesize=100G"
+
+restart the docker deamon
+
+service docker restart
+
+load the file into a image
+
+docker load -i file
+
+### 22 not successful!
+
+23. save a docker image into a tar file
+
+before you save iamge, you must stop container
+
+docker stop $(docker ps -a -q)
+
+docker rm $(docker ps -a -q)
+
+docker save johnzhu999/gina-wrf381 > johnzhu999@gina-wrf381
+
+24. connet a local directory to a directory in a container
+
+docker run -it -v /home/jzhu4/data/docker_wrf381_data:/home/jzhu/data -u jzhu -w /home/jzhu  johnzhu999/gina-wrf381
+
+connect /home/jzhu4/data/docker_wrf381_data to /home/jzhu/data in the container 
+
+in container, only root user can write, you can use sudo to write in user jzhu.
+
+25. rollback a docker image
+
+docker history johnzhu999/gina-wrf381
+
+docker tag d782f48d2458 johnzhu999/gina-wrf381
+
+26. sometime, apt-get install can not work, it shows temperary solve the URL. Inn this situation, you need restart your docker daemon.
+
+sudo service docker restart
+
+27. make docker container work with gui apps.
+
+make user in docker image has the same uid:gid as your local host user uid:gid
+
+in docker container,
+
+cd /etc/
+
+sudo vi passwd
+
+change jzhu:x:1000:1000 with jzhu:x:30650116:30650116
+
+sudo vi group
+
+change jzhu:1000 with jzhu:30650116
+
+exit
+
+docker commit container_ID docker_image_name
+
+docker run -ti --rm  -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /home/jzhu4/data/docker_wrf381_data:/home/jzhu/data -u jzhu johnzhu999/gina-wrf381
+
+
+28. totally destroy docker
+
+Uninstall just docker
+Run the following command
+
+sudo apt-get remove docker-engine
+Uninstall docker and its dependencies
+
+
+sudo apt-get remove --auto-remove docker-engine
+Purging your docker config/data only
+
+
+sudo apt-get purge docker-engine
+Purging your docker config/data with dependencies
+
+
+sudo apt-get purge --auto-remove docker-engine
+
+
+29. install docker on ununtu
+
+sudo su -
+
+apt-get update
+apt-get install apt-transport-https ca-certificates
+apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-cache policy docker-engine
+apt-get update
+apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual
+apt-get update
+apt-get install docker-engine
+
+#change docker directory
+
+sudo service docker stop
+
+vi /etc/default/docker
+
+add following line
+
+DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4 -g /mnt/raid"
+
+sudo service docker start
+
+#build docker from Dockerfile1 at current path
+
+docker build -t "gina-wrf-docker:1" -f Dockerfile1 .
+
+30. roll back to previous image
+
+docker history gina-wrf-docker:1
+
+docker tag e752a4920586 gina-wrf-docker:1
+
+31. make docker image smaller
+
+multiple RUN into a single RUN, use clean
+
+RUN apt-get -y install nano git; apt-get -y clean all
+
+RUN apt-get -y install nano && apt-get -y install git && pat-get -y clean all
+
+32. cannot use adduser to add a user in docker container, it will make the docker image go crazy (10G).
+
+
+33. add user jzhu to sudo
+
+#usermod -aG sudo jzhu
+
+

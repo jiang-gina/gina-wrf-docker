@@ -1,0 +1,31 @@
+FROM ginawrf381:2
+MAINTAINER jiang zhu <jiang@gina.alaska.edu>
+#
+#This Dockerfile compile WRF,WPS, and comGSIv3.5_ENKF1.1
+#
+ENV WRF_VERSION 3.8.1
+WORKDIR /wrf
+#Download original sources
+#
+RUN curl -SL http://www2.mmm.ucar.edu/wrf/src/WRFV$WRF_VERSION.TAR.gz | tar zxC /wrf \
+ && curl -SL http://www2.mmm.ucar.edu/wrf/src/WPSV$WRF_VERSION.TAR.gz | tar zxC /wrf
+#
+
+#set environment fot interactive container shell
+
+RUN echo export JASPERLIB=/usr/lib/x86_64-linux-gnu >> /etc/bash.bashrc \
+ && echo export JASPERINC=/usr/include/jasper >> /etc/bash.bashrc \
+ && echo export NETCDF=/usr >> /etc/bash.bashrc \
+ && echo export WRFIO_NCD_LARGE_FILE_SUPPORT=1 >> /etc/bash.bashrc \
+ && echo export WRF_EM_CORE=1 >> /etc/bash.bashrc \
+ && echo setenv JASPERLIB "/usr/lib/x86_64-linux-gnu" >> /etc/csh.cshrc \
+ && echo setenv JASPERINC "/usr/include/jasper" >> /etc/csh.cshrc \
+ && echo setenv NETCDF "/usr" >> /etc/csh.cshrc \
+ && echo setenv WRFIO_NCD_LARGE_FILE_SUPPORT 1 >> /etc/csh.cshrc \
+ && echo setenv WRF_EM_CORE 1 >> /etc/csh.cshrc
+
+#build WRF
+
+RUN cd /wrf/WRFV3
+RUN ./configure<<<$'34\r1\r'
+# && /bin/csh ./compile em_real

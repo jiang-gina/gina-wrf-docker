@@ -1,0 +1,11 @@
+#install WRF381 based on ginawrf:1
+FROM ginawrf381:1
+
+#now start to install WRF381
+
+#1. install prerequest libriries. including netcdf,mpoch2, jasper, png, amd m4 
+
+RUN sudo apt-get -y install csh tcsh libnetcdf-dev mpich2 libjasper-dev m4 libblas-dev liblapack-dev && sudo apt-get -y clean all
+
+#2. set env
+ 

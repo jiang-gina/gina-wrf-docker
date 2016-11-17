@@ -1,0 +1,25 @@
+#create WRF model docker iamge. WRF381 are used.
+FROM ubuntu:14.04.4
+RUN apt-get -qq update && apt-get -y install curl wget vim && mkdir /data && apt-get -y clean all
+#if you assign giu and uid, the docker image will go crazy, like 10G.
+#RUN groupadd --gid 30650116 jzhu && useradd --uid 30650116 -g jzhu --home /home/jzhu jzhu
+#if you use groupadd -r anmd useadd -r to assign giu and uid, it works, docker image is normal!
+
+RUN groupadd -r jzhu && useradd -r -g jzhu --home /home/jzhu jzhu
+USER jzhu
+WORKDIR /home/jzhu
+
+#docker build -t "ginawrf:1" -f Dockerfile1 .
+#docker run -it ginawrf381:1
+#vi /etc/passwd, change uid and gid of user jzhu into 30650116:30650116
+#vi /etc/group, change group id for group name jzhu into 30650116 
+#add jzhu to sudo group
+##usrmod -aG sudo jzhu
+#exit
+#docker commit continer_ID ginawrf381:1
+
+
+
+
+
+
